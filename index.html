@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Cola switch</title>
+  <meta
+    name="description"
+    content="一个更直接的 Cola API 切换面板。填入 API Key，选服务商或自定义 provider，点一下就切换。"
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero-card">
+      <div>
+        <p class="eyebrow">COLA SWITCH</p>
+        <h1>填好就切，不再导配置。</h1>
+        <p class="hero-copy">
+          这个版本只做一件事：把 Cola 的服务商、套餐入口、模型和 API Key 直接写进本地配置。
+          常见厂商给预设，不在列表里的也能用自定义模式接入。
+        </p>
+      </div>
+      <div class="hero-badge">
+        <span>当前模式</span>
+        <strong>直接切换</strong>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="card status-card">
+        <div class="section-head">
+          <p class="eyebrow">Current</p>
+          <h2>当前 Cola 配置</h2>
+        </div>
+        <div id="status-panel" class="status-panel is-loading">正在读取本地配置...</div>
+      </section>
+
+      <section class="card switch-card">
+        <div class="section-head">
+          <p class="eyebrow">Switch</p>
+          <h2>立即切换</h2>
+          <p>只做三步：选服务商，填 API Key，点切换。高级设置默认折叠。</p>
+        </div>
+
+        <form id="switch-form" class="switch-form" novalidate>
+          <div class="field-grid">
+            <div class="field-block field-block-wide">
+              <span class="field-label">服务商</span>
+              <div id="provider-grid" class="provider-grid"></div>
+            </div>
+
+            <label class="field-block field-block-wide">
+              <span class="field-label" for="api-key-input">API Key</span>
+              <input
+                id="api-key-input"
+                class="field-input"
+                type="password"
+                placeholder="留空则沿用当前服务商已保存的 key"
+                autocomplete="off"
+              >
+              <span id="provider-hint" class="field-help"></span>
+            </label>
+          </div>
+
+          <details id="advanced-panel" class="advanced-panel">
+            <summary>高级设置（可选）</summary>
+            <div class="advanced-grid">
+              <label id="variant-block" class="field-block">
+                <span class="field-label" for="variant-select">入口 / 套餐</span>
+                <select id="variant-select" class="field-input"></select>
+                <span id="variant-help" class="field-help"></span>
+              </label>
+
+              <label class="field-block">
+                <span class="field-label" for="model-input">模型</span>
+                <input
+                  id="model-input"
+                  class="field-input"
+                  type="text"
+                  placeholder="例如 gpt-5.4-mini / claude-sonnet-4-6 / moonshotai/kimi-k2.5"
+                  list="model-suggestions"
+                  autocomplete="off"
+                >
+                <datalist id="model-suggestions"></datalist>
+                <span id="model-help" class="field-help"></span>
+              </label>
+
+              <div id="custom-fields" class="custom-fields field-block-wide" hidden>
+                <label class="field-block">
+                  <span class="field-label" for="custom-provider-select">Cola Provider</span>
+                  <select id="custom-provider-select" class="field-input"></select>
+                  <span class="field-help">只有接列表外厂商时才需要改这里。</span>
+                </label>
+
+                <label class="field-block">
+                  <span class="field-label" for="custom-base-url-input">自定义 Base URL</span>
+                  <input
+                    id="custom-base-url-input"
+                    class="field-input"
+                    type="text"
+                    placeholder="https://your-provider.example.com/v1"
+                    autocomplete="off"
+                  >
+                  <span class="field-help">只有自定义接入时才需要填写。</span>
+                </label>
+              </div>
+            </div>
+          </details>
+
+          <div class="apply-row">
+            <div id="action-summary" class="action-summary"></div>
+            <button id="apply-button" data-apply-button="true" class="primary-button" type="submit">保存并切换 Cola</button>
+            <p class="apply-note">默认会用这个服务商的推荐入口和默认模型。</p>
+          </div>
+        </form>
+
+        <div id="result-banner" class="result-banner" hidden></div>
+      </section>
+    </main>
+  </div>
+
+  <template id="provider-card-template">
+    <button class="provider-card" type="button">
+      <span class="provider-name"></span>
+      <span class="provider-meta"></span>
+    </button>
+  </template>
+
+  <script src="script.js"></script>
+</body>
+</html>
