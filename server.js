@@ -366,6 +366,22 @@ async function writeSettings(settings) {
   await fsp.chmod(SETTINGS_FILE, FILE_MODE);
 }
 
+async function backupSettings(currentModel) {
+  const backupDir = path.dirname(SETTINGS_FILE);
+  await fsp.mkdir(backupDir, { recursive: true });
+
+  const safeModel = (currentModel || "unknown").replace(/[/\\:*?"<>|]/g, "-");
+  const timestamp = new Date().toISOString().replace(/[:]/g, "-").replace(/\..+/, "");
+  const backupName = `${path.basename(SETTINGS_FILE, ".json")}.backup-${safeModel}-${timestamp}.json`;
+  const backupPath = path.join(backupDir, backupName);
+
+  await fsp.copyFile(SETTINGS_FILE, backupPath);
+  await fsp.chmod(backupPath, FILE_MODE);
+
+  await appendServerLog(`backup saved model=${currentModel} file=${backupName}`);
+  return backupPath;
+}
+
 function findProvider(providerId) {
   return PROVIDERS.find((item) => item.id === providerId);
 }
@@ -512,6 +528,11 @@ async function handleApply(request, response) {
     previousBaseUrl === baseUrl &&
     previousApiKey === apiKey
   );
+
+  if (changed) {
+    const backupPath = await backupSettings(previousModel);
+    await appendServerLog(`backup created at ${backupPath}`);
+  }
 
   await writeSettings(settings);
   await appendServerLog(`apply done colaProvider=${colaProvider} model=${model} changed=${changed}`);
